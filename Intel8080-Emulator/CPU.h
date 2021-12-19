@@ -48,10 +48,11 @@
 
             void Step();  // Execute a single instruction
             void Reset(); // Reset the CPU to a known state
-            void LoadProgram(std::vector<unsigned short>); // load program into memory, starting at 0x00
+            void LoadProgramIntoMemoryAt(std::vector<unsigned char>, unsigned int); // load program into memory, starting at 0x00
             void GetInstructionSize();
             void Set_Z_S_C_Flags(unsigned short);
             void Dump_Registers();
+            int  Parity(int, int);
 
     }; // Class CPU()
 //  =================

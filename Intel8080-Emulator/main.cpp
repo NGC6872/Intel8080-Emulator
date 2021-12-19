@@ -6,45 +6,59 @@
     #include <fstream>
     #include "CPU.h"
     #include <vector>
-    
-  // ============
-    int main() {
-    
-        CPU cpu;
+    #include "../packages/Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.3/build/native/include/gtest/internal/gtest-port.h"
+#include "../packages/Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.3/build/native/include/gtest/gtest.h"
+       
 
-         //Open binary file, read each byte and store each byte in a vector
 
-        std::fstream file("invaders.e", std::ios::in | std::ios::out | std::ios::binary);
+ // // ============
+ //   int main() {
+ //   
+ //       CPU cpu;
 
-        file.seekg(0);
+ //        //Open binary file, read each byte and store each byte in a vector
 
-        std::vector<unsigned short> program;
+ //       std::fstream file("invaders.concatenated", std::ios::in | std::ios::out | std::ios::binary);
 
-        while (!file.eof()) {
+ //       file.seekg(0);
 
-            unsigned char x;
+ //       std::vector<unsigned char> program;
 
-            file.read(reinterpret_cast<char*>(&x), 1);
+ //       while (!file.eof()) {
 
-            program.push_back(x);
+ //           unsigned char x;
 
-        }
+ //           file.read(reinterpret_cast<char*>(&x), 1);
 
-        // Load program into memory
+ //           program.push_back(x);
 
-        cpu.LoadProgram(program);
+ //       }
 
-       // cpu.GetInstructionSize();
+ //       // Load program into memory
 
-        
-        cpu.Step();
-        
-        cpu.Dump_Registers();
-        //cpu.Step();
-        //cpu.Step();
-        //cpu.Step();
+ //       cpu.LoadProgramIntoMemoryAt(program, 0x00);
 
-    	return 0;
+ //       cpu.PC = 3;
+ //      
+ //       while (true) {
 
-    } // Function main()
- // ====================
+ //           
+ //           cpu.Step();
+ //       }
+ //       
+
+
+ //    
+ //      
+ //   	return 0;
+
+ //   } // Function main()
+ //// ====================
+
+GTEST_API_ int main(int argc, char** argv) {
+
+    printf("Running main() google test", __FILE__);
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+
+}

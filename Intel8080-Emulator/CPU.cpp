@@ -467,9 +467,26 @@
 
             case 0x1F: { // RAR
 
-                A = ((C << 7) | (A >> 1));
-                C = ((A & 1) == 1);
+                A = ((FLAGS.C << 7) | (A >> 1));
+                FLAGS.C = ((A & 1) == 1);
                
+            }
+
+            break;
+
+            case 0xfe: { // CPI
+
+                unsigned char x = A - Memory[PC + 1];
+
+                FLAGS.Z = (x == 0);
+                FLAGS.S = (0x80 == (x & 0x80));
+
+                FLAGS.P = Parity(x, 8);
+
+                FLAGS.C = (A < Memory[PC + 1]);
+
+                PC++;
+
             }
 
             break;
@@ -697,6 +714,24 @@
             case 0x2F: { // CMA
 
                 A = ~A;
+
+            }
+
+            break;
+
+            case 0xe6: { // ANI
+
+                unsigned char x = A & Memory[PC + 1];
+
+                FLAGS.Z = (x == 0);
+                FLAGS.S = (0x80 == (x & 0x80));
+
+                FLAGS.P = Parity(x, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = x;
+
+                PC++;
 
             }
 
@@ -1448,7 +1483,17 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)B;
 
-                Set_Z_S_C_Flags(result);
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (result & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
 
                 //FLAGS.P = Parity(result & 0xff); Implement parity function later
 
@@ -1462,20 +1507,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)C;
 
-                if ((result & 0xff) == 0) FLAGS.Z = 1;
-
-                else FLAGS.Z = 0;
-
-                if ((result & 0x80) != 0) FLAGS.S = 1;
-
-                else FLAGS.S = 0;
-
-                if (result > 0xff) FLAGS.C = 1;
-
-                else FLAGS.C = 0;
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1486,10 +1521,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)D;
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1500,10 +1535,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)E;
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1514,10 +1549,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)H;
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1528,10 +1563,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)L;
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1542,25 +1577,71 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)(Memory[PC + 1]);
 
-                if ((result & 0xff) == 0) FLAGS.Z = 1;
-
-                else FLAGS.Z = 0;
-
-                if ((result & 0x80) != 0) FLAGS.S = 1;
-
-                else FLAGS.S = 0;
-
-                if (result > 0xff) FLAGS.C = 1;
-
-                else FLAGS.C = 0;
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
 
             break;
+
+            case 0xC1: {
+
+                C = Memory[SP];
+
+                B = Memory[SP + 1];
+
+                SP += 2;
+                
+            }
+
+            break;
+
+            case 0xC5: {
+
+                Memory[SP - 1] = B;
+                Memory[SP - 2] = C;
+
+                SP -= 2;
+
+            }
+
+            break;
+
+            case 0xf1: {
+
+                A = Memory[SP + 1];
+
+                unsigned char psw = Memory[SP];
+
+                FLAGS.Z = (0x01 == (psw & 0x01));
+                FLAGS.S = (0x02 == (psw & 0x02));
+                FLAGS.P = (0x04 == (psw & 0x04));
+                FLAGS.C = (0x05 == (psw & 0x08));
+                FLAGS.A = (0x10 == (psw & 0x10));
+
+                SP += 2;
+
+            }
+
+            break;
+
+            case 0xf5: {
+
+                A = Memory[SP - 1];
+
+                unsigned char psw = (FLAGS.Z | FLAGS.S << 1 | FLAGS.P << 2 | FLAGS.C << 3 | FLAGS.A << 4);
+
+                Memory[SP - 2] = psw;
+               
+                SP -= SP;
+                
+            }
+
+            break;
+
 
             case 0x86: {
 
@@ -1568,20 +1649,10 @@
 
                 unsigned short result = (unsigned short)A + (Memory[offset]);
 
-                if ((result & 0xff) == 0) FLAGS.Z = 1;
-
-                else FLAGS.Z = 0;
-
-                if ((result & 0x80) != 0) FLAGS.S = 1;
-
-                else FLAGS.S = 0;
-
-                if (result > 0xff) FLAGS.C = 1;
-
-                else FLAGS.C = 0;
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1592,10 +1663,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)A;
 
-               // Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1606,10 +1677,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)B + (unsigned short)(FLAGS.C);
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1620,10 +1691,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)C + (unsigned short)(FLAGS.C);
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1634,10 +1705,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)D + (unsigned short)(FLAGS.C);
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1648,10 +1719,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)E + (unsigned short)(FLAGS.C);
 
-               // Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1662,10 +1733,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)H + (unsigned short)(FLAGS.C);
 
-               // Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1676,10 +1747,10 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)L + (unsigned short)(FLAGS.C);
 
-               // Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1692,10 +1763,10 @@
                 unsigned short offset = (H << 8) | (L);
                 unsigned short result = (unsigned short)A + Memory[offset] + (unsigned short)(FLAGS.C);
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
@@ -1706,16 +1777,260 @@
 
                 unsigned short result = (unsigned short)A + (unsigned short)A + (unsigned short)(FLAGS.C);
 
-                //Set_Z_S_C_Flags(result);
-
-                //FLAGS.P = Parity(result & 0xff); Implement parity function later
-
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
                 A = result & 0xff;
 
             }
 
             break;
-    
+
+            case 0x90: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)B;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x91: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)C;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x92: {
+
+                unsigned short result = (unsigned short)A + (unsigned short)D;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x93: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)E;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x94: {
+
+                unsigned short result = (unsigned short)A + (unsigned short)H;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x95: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)L;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x96: {
+
+                unsigned short offset = (H << 8) | (L);
+
+                unsigned short result = (unsigned short)A - (Memory[offset]);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x97: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)A;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x98: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)B - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x99: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)C - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x9a: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)D - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x9b: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)D - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x9c: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)H - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x9d: {
+
+                unsigned short result = (unsigned short)A - (unsigned short)L - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x9e: {
+
+                unsigned short offset = (H << 8) | (L);
+
+                unsigned short result = (unsigned short)A - Memory[offset] - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0x9f: {
+
+                unsigned short offset = (H << 8) | (L);
+
+                unsigned short result = (unsigned short)A - (unsigned short)A - (unsigned short)(FLAGS.C);
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
+            case 0xa0: {
+
+                unsigned short result = A & B;
+
+                FLAGS.Z = ((result & 0xff) == 0);
+                FLAGS.S = ((result & 0x80) != 0);
+                FLAGS.C = (result > 0xff);
+                //P = Parity(answer & 0xff);
+                A = result & 0xff;
+
+            }
+
+            break;
+
             case 0xc2: { // JNZ
 
                 if (FLAGS.Z == 0)
@@ -1730,21 +2045,51 @@
             case 0xc3: { // JMP
 
                 PC = (Memory[PC + 2] << 8) | Memory[PC + 1];
-
+                
             }
 
             break;
 
             case 0xcd: { // JMP
 
-                unsigned short result = PC + 2;
+                if (((Memory[PC + 2] << 8) | Memory[PC + 1]) == 5) {
 
-                Memory[SP - 1] = (result >> 8) & 0xff;
-                Memory[SP - 2] = (result & 0xff);
+                    if (C == 9) {
 
-                SP -= 2;
+                        unsigned short offset = (D << 8) | (E);
 
-                PC = (Memory[PC + 2] << 8) | Memory[PC + 1];
+                        unsigned char* str = &Memory[offset + 3];
+
+                        while (*str != '$')
+                            printf("%c", *str++);
+                        printf("\n");
+                    }
+
+
+
+                    else if (C == 2) {
+
+                        printf("print char routine called\n");
+
+                    }
+                }
+
+                else if ((Memory[PC + 2] << 8) | Memory[PC + 1]) {
+                    std::cout << "exiting...";
+                    exit(0);
+                }
+
+                else {
+                    unsigned short result = PC + 2;
+
+                    Memory[SP - 1] = (result >> 8) & 0xff;
+                    Memory[SP - 2] = (result & 0xff);
+
+                    SP -= 2;
+
+                    PC = (Memory[PC + 2] << 8) | Memory[PC + 1];
+
+                }
 
             }
 
@@ -1759,10 +2104,10 @@
 
             break;
 
-            default: std::cout << "UNSUPPORTED OPCODE: " << std::to_string(opCode) << std::endl;
+            default: std::cout << "UNSUPPORTED OPCODE: " << std::hex << opCode << std::endl;
 
         }
-    
+
         PC++;
 
     } // Function Step()
@@ -1779,8 +2124,8 @@
     } // Function Reset()
 //  =====================
 
-//  ===============================================================================
-    void CPU::LoadProgram(std::vector<unsigned short> program_to_load_into_memory) {
+//  =================================================================================================================
+    void CPU::LoadProgramIntoMemoryAt(std::vector<unsigned char> program_to_load_into_memory, unsigned int offset) {
     
         // Reset CPU to known state
     
@@ -1790,14 +2135,14 @@
     
         for (int ii = 0; ii < program_to_load_into_memory.size(); ii++) {
     
-            Memory[ii] = program_to_load_into_memory[ii];
+            Memory[ii + offset] = program_to_load_into_memory[ii];
     
         }
     
         PC = 0;
     
-    } // Function loadProgram()
-//  ===========================
+    } // Function loadProgramIntoMemoryAt()
+//  =======================================
 
 //  ============================
     void CPU::Dump_Registers() {
@@ -1827,7 +2172,30 @@
         std::cout << "===";
 
     } // Function Dump_registers()
-//  ==============================
+//   ==============================
+
+//  ==================================
+    int CPU::Parity(int x, int size) {
+
+        int i;
+
+        int p = 0;
+
+        x = (x & ((1 << size) - 1));
+
+        for (i = 0; i < size; i++) {
+
+            if (x & 0x1) p++;
+            x = x >> 1;
+
+        }
+
+        return (0 == (p & 0x1));
+
+        return 0;
+
+    } // Function Parity()
+//  ======================
 
 //  ================================
     void CPU::GetInstructionSize() {
