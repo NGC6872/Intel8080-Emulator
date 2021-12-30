@@ -1,5 +1,6 @@
     #pragma once
 
+    #include "pch.h"
     #include <vector>
     #include <string>
    
@@ -50,11 +51,11 @@
             void Reset(); // Reset the CPU to a known state
             void LoadProgramIntoMemoryAt(std::vector<unsigned char>, unsigned int); // load program into memory, starting at 0x00
             void GetInstructionSize();
-            void Set_Z_S_C_Flags(unsigned short);
+            void SetArithmeticFlags(unsigned short);
+            void SetCarryFlag(unsigned short);
+            void SetZeroFlag(unsigned short);
             void Dump_Registers();
             int  Parity(int, int);
 
     }; // Class CPU()
 //  =================
-    
-    
