@@ -437,7 +437,6 @@ TEST(INTEL8080, DAD_D) { // DAD D => HL = HL + DE
 	cpu.D = 0x80;
 	cpu.E = 0x80;
 
-
 	unsigned int pair_HL = (cpu.H << 8) | (cpu.L);
 	unsigned int pair_DE = (cpu.D << 8) | (cpu.E);
 
@@ -2110,6 +2109,10 @@ TEST(INTEL8080, ADC_A) { // ADC A
 
 }
 
+// End ADC instruction tests
+
+// Begin SUB instruction tests
+
 TEST(INTEL8080, SUB_B) { // SUB B
 
 	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.B;
@@ -2287,5 +2290,1245 @@ TEST(INTEL8080, SUB_A) { // SUB A
 	EXPECT_EQ(cpu.FLAGS.C, 0);
 
 	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+// End SUB instruction tests
+
+// Begin SBB instruction tests
+
+TEST(INTEL8080, SBB_B) { // SBB B
+
+	cpu.A = 0x50;
+	cpu.B = 0x07;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.B - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.B + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+TEST(INTEL8080, SBB_C) { // SBB C
+
+	cpu.A = 0x50;
+	cpu.C = 0x03;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.C - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+TEST(INTEL8080, SBB_D) { // SBB D
+
+	cpu.A = 0x50;
+	cpu.D = 0x11;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.D - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.D + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+TEST(INTEL8080, SBB_E) { // SBB E
+
+	cpu.A = 0x50;
+	cpu.E = 0x60;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.E - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.E + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 1);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+TEST(INTEL8080, SBB_H) { // SBB H
+
+	cpu.A = 0x12;
+	cpu.H = 0x09;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.H - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.H + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+TEST(INTEL8080, SBB_L) { // SBB L
+
+	cpu.A = 0x17;
+	cpu.L = 0x30;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.L - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.L + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 1);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+TEST(INTEL8080, SBB_M) { // SBB M
+
+	cpu.A = 0x17;
+	cpu.L = 0x30;
+
+	cpu.H = 0x09;
+
+	unsigned short pair_HL = (cpu.H << 8) | (cpu.L);
+
+
+
+	unsigned short result = (unsigned short)cpu.A - cpu.Memory[pair_HL] - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.Memory[pair_HL] + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+TEST(INTEL8080, SBB_A) { // SBB A
+
+	cpu.A = 0x17;
+	
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.A - (unsigned short)(cpu.FLAGS.C);
+
+	cpu.SetArithmeticFlags(result);
+
+	// Set aux carry flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.A + cpu.FLAGS.C) & 0xf)) > 0xf);
+
+	cpu.A = result & 0xff;
+
+	EXPECT_EQ(cpu.FLAGS.Z, 1);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+
+	EXPECT_EQ(cpu.A, result & 0xFF);
+
+}
+
+// End SBB instruction tests
+
+// Begin ANA instruction tests
+
+TEST(INTEL8080, ANA_B) { // ANA B
+
+	cpu.A = 0x16;
+	cpu.B = 0x9d;
+
+	unsigned char result = cpu.A & cpu.B;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x14);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ANA_C) { // ANA C
+
+	cpu.A = 0x58;
+	cpu.C = 0x3c;
+
+	unsigned char result = cpu.A & cpu.C;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x18);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ANA_D) { // ANA D
+
+	cpu.A = 0x58;
+	cpu.D = 0x6c;
+
+	unsigned char result = cpu.A & cpu.D;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x48);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ANA_E) { // ANA E
+
+	cpu.A = 0x1e;
+	cpu.E = 0x32;
+
+	unsigned char result = cpu.A & cpu.E;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x12);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ANA_H) { // ANA H
+
+	cpu.A = 0xd7;
+	cpu.H = 0x15;
+
+	unsigned char result = cpu.A & cpu.H;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x15);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ANA_L) { // ANA L
+
+	cpu.A = 0x5a;
+	cpu.L = 0x3c;
+
+	unsigned char result = cpu.A & cpu.L;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x18);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ANA_M) { // ANA M
+
+	cpu.A = 0x44;
+	cpu.H = 0x6b;
+	cpu.L = 0x20;
+	
+	unsigned short pair_HL = (cpu.H << 8) | (cpu.L);
+
+	cpu.Memory[pair_HL] = 0x8c;
+
+	unsigned char result = cpu.A & cpu.Memory[pair_HL];
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x04);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ANA_A) { // ANA A
+
+	cpu.A = 0x77;
+
+	unsigned char result = cpu.A & cpu.A;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x77);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+// End ANA instruction tests
+
+// Begin XRA instruction tests
+
+TEST(INTEL8080, XRA_B) { // XRA B
+
+	cpu.A = 0x6c;
+	cpu.B = 0x8d;
+
+	unsigned char result = cpu.A ^ cpu.B;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xe1);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, XRA_C) {// XRA C
+
+	cpu.A = 0xbb;
+	cpu.C = 0x67;
+
+	unsigned char result = cpu.A ^ cpu.C;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xdc);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, XRA_D) { // XRA D
+
+	cpu.A = 0x5c;
+	cpu.D = 0x26;
+
+	unsigned char result = cpu.A ^ cpu.D;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x7a);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, XRA_E) { // XRA E
+
+	cpu.A = 0x78;
+	cpu.E = 0xf0;
+
+	unsigned char result = cpu.A ^ cpu.E;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x88);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, XRA_H) { //XRA H
+
+	cpu.A = 0x09;
+	cpu.H = 0xa5;
+
+	unsigned char result = cpu.A ^ cpu.H;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xac);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, XRA_L) { //XRA L
+
+	cpu.L = 0xd6;
+	cpu.A = 0x8a;
+
+	unsigned char result = cpu.A ^ cpu.L;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x5c);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, XRA_M) { //XRA M
+
+	cpu.A = 0x04;
+	cpu.H = 0xd0;
+	cpu.L = 0x2f;
+
+	unsigned short pair_HL = (cpu.H << 8) | (cpu.L);
+
+	cpu.Memory[pair_HL] = 0x5c;
+
+	unsigned char result = cpu.A ^ cpu.Memory[pair_HL];
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x58);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, XRA_A) { // XRA A
+
+	cpu.A = 0x08;
+
+	unsigned char result = cpu.A ^ cpu.A;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0);
+	EXPECT_EQ(cpu.FLAGS.Z, 1);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+// End XRA instruction tests
+
+// Begin ORA instruction tests
+
+TEST(INTEL8080, ORA_B) {
+
+	cpu.A = 0x76;
+	cpu.B = 0xd6;
+
+	unsigned char result = cpu.A | cpu.B;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xf6);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ORA_C) {
+
+	cpu.A = 0x16;
+	cpu.C = 0x2c;
+
+	unsigned char result = cpu.A | cpu.C;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x3e);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ORA_D) {
+
+	cpu.A = 0xc2;
+	cpu.D = 0x98;
+
+	unsigned char result = cpu.A | cpu.D;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xda);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ORA_E) {
+
+	cpu.A = 0x96;
+	cpu.E = 0xc8;
+
+	unsigned char result = cpu.A | cpu.E;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xde);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ORA_H) {
+
+	cpu.A = 0xc9;
+	cpu.H = 0x2f;
+
+	unsigned char result = cpu.A | cpu.H;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xef);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ORA_L) {
+
+	cpu.A = 0xb3;
+	cpu.L = 0x5b;
+
+	unsigned char result = cpu.A | cpu.L;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xfb);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ORA_M) {
+
+	cpu.A = 0x24;
+	cpu.H = 0xb0;
+	cpu.L = 0x2e;
+
+
+	unsigned short pair_HL = (cpu.H << 8) | (cpu.L);
+
+	cpu.Memory[pair_HL] = 0xe6;
+
+	unsigned char result = cpu.A | cpu.Memory[pair_HL];
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0xe6);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+TEST(INTEL8080, ORA_A) {
+
+	cpu.A = 0x04;
+	
+	unsigned char result = cpu.A | cpu.A;
+
+	cpu.A = result;
+
+	if ((cpu.A) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if (cpu.A & 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	cpu.FLAGS.P = cpu.Parity(cpu.A, 8);
+
+	cpu.FLAGS.C = 0;
+	cpu.FLAGS.A = 0;
+
+	EXPECT_EQ(cpu.A, 0x04);
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, 0);
+
+}
+
+// End ORA instruction tests
+
+// Begin CMP instruction tests
+
+TEST(INTEL8080, CMP_B) {
+
+	cpu.A = 0x77;
+	cpu.B = 0x77;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.B;
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 1);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+
+}
+
+TEST(INTEL8080, CMP_C) {
+
+	cpu.A = 0x11;
+	cpu.C = 0x02;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.C;
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+
+}
+
+TEST(INTEL8080, CMP_D) {
+
+	cpu.A = 0x6e;
+	cpu.D = 0xc9;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.D;
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 1);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+
+}
+
+TEST(INTEL8080, CMP_E) {
+
+	cpu.A = 0xea;
+	cpu.E = 0x1b;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.E;
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+
+}
+
+TEST(INTEL8080, CMP_H) {
+
+	cpu.A = 0x67;
+	cpu.H = 0x51;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.H;
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+}
+
+TEST(INTEL8080, CMP_L) {
+
+	cpu.A = 0x90;
+	cpu.L = 0x14e;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.L;
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+}
+
+TEST(INTEL8080, CMP_M) {
+
+	cpu.A = 0x90;
+	
+	unsigned short offset = (cpu.H << 8) | (cpu.L);
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.Memory[offset];
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 0);
+	EXPECT_EQ(cpu.FLAGS.S, 1);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+}
+
+TEST(INTEL8080, CMP_A) {
+
+	cpu.A = 0x90;
+
+	unsigned short result = (unsigned short)cpu.A - (unsigned short)cpu.A;
+
+	if ((result & 0xff) == 0) cpu.FLAGS.Z = 1;
+
+	else cpu.FLAGS.Z = 0;
+
+	if ((result & 0x80) == 0x80) cpu.FLAGS.S = 1;
+
+	else cpu.FLAGS.S = 0;
+
+	if (result > 0xff) cpu.FLAGS.C = 1;
+
+	else cpu.FLAGS.C = 0;
+
+	// Set parity flag
+
+	cpu.FLAGS.P = cpu.Parity(result & 0xff, 8);
+
+	// Set Accumulator flag
+
+	cpu.FLAGS.A = (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf); // Is this correct?
+
+	EXPECT_EQ(cpu.FLAGS.Z, 1);
+	EXPECT_EQ(cpu.FLAGS.S, 0);
+	EXPECT_EQ(cpu.FLAGS.C, 0);
+	EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
+
+}
+
+// End CMP instruction tests
+
+TEST(INTEL8080, RNZ) { // RNZ - Return if not zero - Not yet implemented
+
+	cpu.SP = 0x0000;
+
+	cpu.Memory[cpu.SP] = 0x87;
+	cpu.Memory[cpu.SP + 1] = 0x58;
+
+	cpu.FLAGS.Z = 0;
+
+	if (cpu.FLAGS.Z == 0) {
+
+		cpu.PC = cpu.Memory[cpu.SP] | (cpu.Memory[cpu.SP + 1] << 8);
+		cpu.SP += 2;
+
+	}
+
+	//EXPECT_EQ(cpu.FLAGS.A, (((cpu.A & 0xf) + (-(cpu.C) & 0xf)) > 0xf));
 
 }

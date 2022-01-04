@@ -19,8 +19,6 @@
 
             unsigned char opCode;
 
-            int instructionSize = 1;
-
 //          Registers below
 
 //          ====================
@@ -50,7 +48,6 @@
             void Step();  // Execute a single instruction
             void Reset(); // Reset the CPU to a known state
             void LoadProgramIntoMemoryAt(std::vector<unsigned char>, unsigned int); // load program into memory, starting at 0x00
-            void GetInstructionSize();
             void SetArithmeticFlags(unsigned short);
             void SetCarryFlag(unsigned short);
             void SetZeroFlag(unsigned short);

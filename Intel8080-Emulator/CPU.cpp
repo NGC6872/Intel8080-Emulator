@@ -1921,135 +1921,940 @@
 
             break;
 
-            case 0x98: { // tested until here
+            case 0x98: { // SBB B
 
                 unsigned short result = (unsigned short)A - (unsigned short)B - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(B + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0x99: {
+            case 0x99: { // SBB C
 
                 unsigned short result = (unsigned short)A - (unsigned short)C - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(C + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0x9a: {
+            case 0x9a: { // SBB D
 
                 unsigned short result = (unsigned short)A - (unsigned short)D - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(D + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0x9b: {
+            case 0x9b: { // SBB E
 
-                unsigned short result = (unsigned short)A - (unsigned short)D - (unsigned short)(FLAGS.C);
+                unsigned short result = (unsigned short)A - (unsigned short)E - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(E + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0x9c: {
+            case 0x9c: { // SBB H
 
                 unsigned short result = (unsigned short)A - (unsigned short)H - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(H + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0x9d: {
+            case 0x9d: { // SBB L
 
                 unsigned short result = (unsigned short)A - (unsigned short)L - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(L + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0x9e: {
+            case 0x9e: { // SBB M
 
-                unsigned short offset = (H << 8) | (L);
+                unsigned short pair_HL = (H << 8) | (L);
 
-                unsigned short result = (unsigned short)A - Memory[offset] - (unsigned short)(FLAGS.C);
+                unsigned short result = (unsigned short)A - Memory[pair_HL] - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(Memory[pair_HL] + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0x9f: {
-
-                unsigned short offset = (H << 8) | (L);
+            case 0x9f: { //SBB A
 
                 unsigned short result = (unsigned short)A - (unsigned short)A - (unsigned short)(FLAGS.C);
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
+                SetArithmeticFlags(result);
+
+                // Set aux carry flag
+
+                FLAGS.A = (((A & 0xf) + (-(A + FLAGS.C) & 0xf)) > 0xf);
+
                 A = result & 0xff;
 
             }
 
             break;
 
-            case 0xa0: {
+            // Begin ANA instructions: The contents of a register or any memory location are logically ANDed with the contents stored in the accumulator register. 
+            //                         The resulting answer is saved in the accumulator. 
+            //                         Carry flag is reset, whereas the Auxillary Carry flag is set.
 
-                unsigned short result = A & B;
+            case 0xa0: { // ANA B
 
-                FLAGS.Z = ((result & 0xff) == 0);
-                FLAGS.S = ((result & 0x80) != 0);
-                FLAGS.C = (result > 0xff);
-                //P = Parity(answer & 0xff);
-                A = result & 0xff;
+                unsigned char result = A & B;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
 
             }
 
             break;
+
+            case 0xa1: { // ANA C
+
+                unsigned char result = A & C;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xa2: { // ANA D
+
+                unsigned char result = A & D;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xa3: { // ANA E
+
+                unsigned char result = A & E;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xa4: { // ANA H
+
+                unsigned char result = A & H;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xa5: { // ANA L
+
+                unsigned char result = A & L;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xa6: { // ANA M
+
+                unsigned short pair_HL = (H << 8) | (L);
+
+                Memory[pair_HL] = 0x8c;
+
+                unsigned char result = A & Memory[pair_HL];
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xa7: { // ANA A
+
+                unsigned char result = A & A;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            // Begin XRA instructions
+
+            case 0xa8: { // XRA B
+
+                unsigned char result = A ^ B;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xa9: { // XRA C
+
+                unsigned char result = A ^ C;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xaa: { // XRA D
+
+                unsigned char result = A ^ D;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xab: { // XRA E
+
+                unsigned char result = A ^ E;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xac: { // XRA H
+
+                unsigned char result = A ^ H;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+               
+
+            }
+
+            break;
+
+            case 0xad: { // XRA L
+
+                unsigned char result = A ^ L;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xae: { // XRA M
+
+                unsigned short pair_HL = (H << 8) | (L);
+
+                unsigned char result = A ^ Memory[pair_HL];
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xaf: { // XRA A
+
+                unsigned char result = A ^ A;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            // End XRA instructions
+
+            // Begin ORA instructions
+
+            case 0xb0: { // ORA B
+
+                unsigned char result = A | B;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xb1: { // ORA C
+
+                unsigned char result = A | C;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xb2: { // ORA D
+
+                unsigned char result = A | D;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xb3: { // ORA E
+
+                unsigned char result = A | E;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xb4: { // ORA H
+
+                unsigned char result = A | H;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xb5: { // ORA L
+
+                unsigned char result = A | L;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xb6: { // ORA M
+
+                unsigned short pair_HL = (H << 8) | (L);
+
+                unsigned char result = A | Memory[pair_HL];
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            case 0xb7: { // ORA A
+
+                unsigned char result = A | A;
+
+                A = result;
+
+                if ((A) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if (A & 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                FLAGS.P = Parity(A, 8);
+
+                FLAGS.C = 0;
+                FLAGS.A = 0;
+
+            }
+
+            break;
+
+            // End ORA instructions
+
+            // Begin CMP instructions
+
+            case 0xb8: { // CMP B
+
+                unsigned short result = (unsigned short)A - (unsigned short)B;
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            case 0xb9: { // CMP C
+
+                unsigned short result = (unsigned short)A - (unsigned short)C;
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            case 0xba: { // CMP D
+
+                unsigned short result = (unsigned short)A - (unsigned short)D;
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            case 0xbb: { // CMP E
+
+                unsigned short result = (unsigned short)A - (unsigned short)E;
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            case 0xbc: { // CMP H
+
+                unsigned short result = (unsigned short)A - (unsigned short)H;
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            case 0xbd: { // CMP L
+
+                unsigned short result = (unsigned short)A - (unsigned short)L;
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            case 0xbe: { // CMP M
+
+                unsigned short offset = (H << 8) | (L);
+
+                unsigned short result = (unsigned short)A - (unsigned short)Memory[offset];
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            case 0xbf: { // CMP A
+
+                unsigned short result = (unsigned short)A - (unsigned short)A;
+
+                if ((result & 0xff) == 0) FLAGS.Z = 1;
+
+                else FLAGS.Z = 0;
+
+                if ((result & 0x80) == 0x80) FLAGS.S = 1;
+
+                else FLAGS.S = 0;
+
+                if (result > 0xff) FLAGS.C = 1;
+
+                else FLAGS.C = 0;
+
+                // Set parity flag
+
+                FLAGS.P = Parity(result & 0xff, 8);
+
+                // Set Accumulator flag
+
+                FLAGS.A = (((A & 0xf) + (-(C) & 0xf)) > 0xf); // Is this correct?
+
+            }
+
+            break;
+
+            // End CMP instructions
+
+
 
             case 0xc2: { // JNZ
 
@@ -2217,365 +3022,7 @@
     } // Function Parity()
 //  ======================
 
-//  ================================
-    void CPU::GetInstructionSize() {
-
-        opCode = ((Memory[PC]));
-
-        // only change value of numBytes when instruction size > 1.
-
-        switch (opCode) {
-
-            case 0x01: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x06: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0x11: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x16: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0x1e: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0x21: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x22: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x26: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0x2a: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x2e: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0x31: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x32: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x36: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0x3a: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0x3e: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xc2: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xc3: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xc4: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xc6: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xca: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xcc: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xcd: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xce: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xd2: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xd3: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xd4: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xd6: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xda: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xdb: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xdc: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xde: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xe2: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xe4: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xe6: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xea: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xec: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xee: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xf2: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xf4: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xf6: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-            case 0xfa: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xfc: {
-
-                instructionSize = 3;
-
-            }
-
-            break;
-
-            case 0xfe: {
-
-                instructionSize = 2;
-
-            }
-
-            break;
-
-        }
-
-    } // GetInstructionSize()
-//  =========================
-
-//  ==================================================
+//  =====================================================
     void CPU::SetArithmeticFlags(unsigned short result) {
 
         if ((result & 0xff) == 0) FLAGS.Z = 1;
@@ -2595,7 +3042,7 @@
     } // Function SetArithmeticFlags()
 //  ==================================
 
-//  ==================================================
+//  ===============================================
     void CPU::SetCarryFlag(unsigned short result) {
 
         if ((result > 0xff))
@@ -2606,7 +3053,7 @@
     } // Function SetCarryFlag()
 //  ==================================
 
-//  ==================================================
+//  ==============================================
     void CPU::SetZeroFlag(unsigned short result) {
 
         if ((result & 0xff) == 0)
